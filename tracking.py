@@ -32,7 +32,7 @@ def checkGestures(gesture_dict, radii_list):
             #if not within tolerance for radius pop the gesture
             if not abs(radii_list[index] - ideal) < tolerance:
                 gesture_dict.pop(key)
-    print(gesture_dict)
+    #print(gesture_dict)
 
 
 
