@@ -21,39 +21,27 @@ HAND = gesture.getGesture("hand")#left
 ROCK = gesture.getGesture("rock")#right
 OK = gesture.getGesture("ok")#right
 FLIP = gesture.getGesture("flip")#right
-gesture_list = [L,HAND,ROCK,OK]
+gesture_list = [FLIP, L,HAND,ROCK,OK]
 
-def checkGestures(gesture_dict, radii_list):
-    tolerance = 0.8
-    for key in list(gesture_dict):
-        for dict in gesture_dict.get(key):
-            index = dict.get('index')
-            ideal = dict.get('radius')
+def checkGestures(gestures, radii_list):
+    tolerance = 0.1
+    gesture_dict = {g.name: g.cords for g in gestures} 
+    for index, radius in enumerate(radii_list):
+        temp = []
+        for name, cords in gesture_dict.items():    
             #if not within tolerance for radius pop the gesture
-            if not abs(radii_list[index] - ideal) < tolerance:
-                gesture_dict.pop(key)
-    #print(gesture_dict)
-
-
-
-
-# def checkGesture(gesture, radii_list):
-#     tolerance = 0.05
-#     for cord in gesture:
-#         index = cord.get('index')
-#         ideal = cord.get('radius')
-#         #if not within tolerance for radius pop the gesture
-#         if len(radii_list) <= index or not abs(radii_list[index] - ideal) < tolerance:
-#             return False
-#     return True
-
-
+            if len(cords) <= index or abs(radius - cords[index]) > tolerance:
+                temp.append(name)
+        for name in temp:
+            gesture_dict.pop(name)
+    return list(gesture_dict.keys())
 
 def checkGesture(gesture, radii_list):
     tolerance = 0.1
     for index, ideal in enumerate(gesture.cords):
+        print(index)
         #if not within tolerance for radius pop the gesture
-        if len(radii_list) <= index or not abs(radii_list[index] - ideal) < tolerance:
+        if len(radii_list) <= index or abs(radii_list[index] - ideal) > tolerance:
             return False
     return True
 
@@ -68,27 +56,12 @@ while True:
     results = hands.process(imgRGB)
 
     if results.multi_hand_landmarks:
-        handle.update(
-            results.multi_handedness, 
-            results.multi_hand_landmarks, 
-            lambda pass_lms: mpDraw.draw_landmarks(img, pass_lms, mpHands.HAND_CONNECTIONS)
-        )
+        handle.update(results.multi_handedness, results.multi_hand_landmarks, lambda pass_lms: mpDraw.draw_landmarks(img, pass_lms, mpHands.HAND_CONNECTIONS))
         gesture_label = "idle"
 
-        if checkGesture(FLIP, handle.right_hand.radii):
-            gesture_label = "flip"
-
-
-        # if checkGesture(L, handle.right_hand.radii):
-        #     gesture_label = "L"
-
-        # if checkGesture(ROCK, handle.right_hand.radii):
-            
-       # for g in gesture_list:
-        #     if checkGesture(g, handle.right_hand.radii):
-        #         gesture_label = g.name
-        # if Lcounter > 10:
-        #     exit()
+        gestures_list = checkGestures(gesture_list, handle.right_hand.radii)
+        for g in gestures_list:
+            gesture_label = g
     else:
         gesture_label = None
     
