@@ -8,19 +8,26 @@ class gesture:
         self.name = name
         self.cords = cords
 
-    #normalize cords    
-    def norm(self, cords):
-        #raw list of just radii
-        raw = [d.get('radius') for d in cords]
-        return [float(i)/max(raw) for i in raw]
-
     def toJson(self):
         with open(filename) as file:
             temp = json.load(file)
         temp.update( { self.name: self.cords } )
         with open(filename, 'w') as outfile:
             json.dump(temp, outfile, indent=4, separators=(',',': '))
+    
+    def disregard(self, points_list):
+        for point in points_list:
+            self.cords[point] = -1
+        self.toJson()
 
+def newGesture(name, cords):
+    return gesture(name, norm(cords))
+
+#normalize cords    
+def norm(cords):
+    #raw list of just radii
+    #raw = [r.get('radius') for r in cords]
+    return [float(i)/max(cords) for i in cords]
 
 def getGesture(name):
     with open(filename) as file:
