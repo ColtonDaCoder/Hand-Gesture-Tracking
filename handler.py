@@ -24,6 +24,7 @@ class hand:
     def __init__(self, name):
         self.points = []
         self.radii = []
+        self.temp = []
         self.name = name
     
     def getList(self):
@@ -40,6 +41,7 @@ class hand:
     
     def updateRadii(self):
         self.radii = self.norm([math.dist(point, self.points[0]) for point in self.points])
+        self.temp = self.points
         self.points = []
         
     #normalize cords    

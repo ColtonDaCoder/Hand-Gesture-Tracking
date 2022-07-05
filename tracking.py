@@ -6,7 +6,7 @@ import math
 import json
 import gesture
 from handler import handler
-
+import pyautogui as pag
 
 cap = cv2.VideoCapture(0)
 
@@ -25,7 +25,7 @@ SAVE = gesture.getGesture("save")
 gesture_list = [FLIP,L,HAND,ROCK,OK,PEACE,SAVE]
 
 def checkGestures(gestures, radii_list):
-    tolerance = 0.15
+    tolerance = 0.1
     gesture_dict = {g.name: g.cords for g in gestures} 
     #check every radius with respective index from radii_list
     for index, radius in enumerate(radii_list):
@@ -62,6 +62,8 @@ Handcounter = 0
 Lcounter = 0
 gesture_label = None
 
+prevX = 0
+prevT = 0.0001
 while True:
     success, img = cap.read()
     imgRGB = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -76,8 +78,28 @@ while True:
         left_gesture = checkGestures(gesture_list, handle.left_hand.radii)        
         right_gesture = checkGestures(gesture_list, handle.right_hand.radii)
 
-       # if left_gesture == "save":
-       #     saveGesture("save", handle.left_hand.radii)
+
+        if len(handle.right_hand.temp) > 0:
+            x = handle.right_hand.temp[0][0] 
+            t = time.time()
+            speed = (x-prevX) / (t-prevT)
+            if speed > 0.8: 
+                pag.hotkey('ctrl', 'left')
+                time.sleep(0.5)
+            if speed < -0.8:
+                pag.hotkey('ctrl', 'right')
+                time.sleep(0.5)
+            prevX = x
+            prevT = t
+
+
+
+        if left_gesture == "save":
+            pag.hotkey('ctrl', 'left')
+            time.sleep(0.5)
+        if right_gesture == "save":
+            pag.hotkey('ctrl', 'right')
+            time.sleep(0.5)
     else:
         left_gesture = "None"
         right_gesture = "None"
