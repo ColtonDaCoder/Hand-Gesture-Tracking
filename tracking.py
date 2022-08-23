@@ -1,5 +1,5 @@
-import cv2
 import mediapipe as mp
+import cv2
 import time
 import os
 import math
@@ -7,6 +7,8 @@ import json
 import gesture
 from handler import handler
 import pyautogui as pag
+import actions
+
 
 cap = cv2.VideoCapture(0)
 
@@ -72,34 +74,43 @@ while True:
     if results.multi_hand_landmarks:
         #update hand radii and draw landmarks
         handle.update(results.multi_handedness, results.multi_hand_landmarks, lambda pass_lms: mpDraw.draw_landmarks(img, pass_lms, mpHands.HAND_CONNECTIONS))
-        gesture_label = "idle"
+        gesture_label = "idle1"
 
         #get left and right gestures
         left_gesture = checkGestures(gesture_list, handle.left_hand.radii)        
         right_gesture = checkGestures(gesture_list, handle.right_hand.radii)
 
-
-        if len(handle.right_hand.temp) > 0:
-            x = handle.right_hand.temp[0][0] 
-            t = time.time()
-            speed = (x-prevX) / (t-prevT)
-            if speed > 0.8: 
-                pag.hotkey('ctrl', 'left')
-                time.sleep(0.5)
-            if speed < -0.8:
-                pag.hotkey('ctrl', 'right')
-                time.sleep(0.5)
-            prevX = x
-            prevT = t
-
-
-
         if left_gesture == "save":
-            pag.hotkey('ctrl', 'left')
-            time.sleep(0.5)
+            x = 10 * handle.left_hand.temp[0][0]
+            actions.volume(False, int(x))
+
         if right_gesture == "save":
-            pag.hotkey('ctrl', 'right')
-            time.sleep(0.5)
+            x = 10 - 10*handle.right_hand.temp[0][0]
+            actions.volume(True, int(x))
+
+
+        
+        #if len(handle.right_hand.temp) > 0:
+        #    x = handle.right_hand.temp[0][0] 
+        #    t = time.time()
+        #    speed = (x-prevX) / (t-prevT)
+        #    if speed > 1.5: 
+        #        #pag.hotkey('ctrl', 'right')                
+        #        #actions.volume(True)
+        #        time.sleep(0.5)
+        #    if speed < -1.5:
+        #        #pag.hotkey('ctrl', 'left')
+        #        actions.volume(False)
+        #        time.sleep(0.5)
+        #    prevX = x
+        #    prevT = t
+
+        #if left_gesture == "save":
+        #    pag.hotkey('ctrl', 'left')
+        #    time.sleep(0.5)
+        #if right_gesture == "save":
+        #    pag.hotkey('ctrl', 'right')
+        #    time.sleep(0.5)
     else:
         left_gesture = "None"
         right_gesture = "None"
@@ -107,7 +118,7 @@ while True:
     img = cv2.flip(img,1)
     output = str(left_gesture) + " " + str(right_gesture)
     cv2.putText(img,str(output), (10,70), cv2.FONT_HERSHEY_PLAIN, 3, (255,0,255), 3)
-    cv2.imshow('Filtered', img)
-    cv2.waitKey(1)
+    #cv2.imshow('Filtered', img)
+    #cv2.waitKey(1)
 
  
